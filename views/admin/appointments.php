@@ -6,9 +6,9 @@ $appointmentModel = new Appointment();
 if ($permission == 'operator') {
     $appointments = $appointmentModel->getAllWithDoctorAndTreatment();
 } elseif ($permission == 'doctor') {
-    $appointments = $appointmentModel->getAllWithDoctorAndTreatmentByUserId($user_id);
+    $appointments = $appointmentModel->getAllWithDoctorAndTreatmentByUserId($userId);
 } else {
-    dd('Permission denied!');
+    header('location: views/auth/login.php');
 }
 
 ?>

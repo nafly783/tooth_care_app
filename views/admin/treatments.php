@@ -1,66 +1,273 @@
 <?php
 require_once('../layouts/header.php');
-require_once __DIR__ . '/../../models/Treatment.php';
+include BASE_PATH . '/models/Treatment.php';
 
-$treatmentModel = new Treatment();
-$treatments = $treatmentModel->getAll();
+$TreatmentModel = new Treatment();
+$data = $TreatmentModel->getAll();
+
+if ($permission != 'operator') dd('Access Denied...!');
+
 ?>
-<div class="container">
 
-    <h1 class="mx-3 my-5">Treatments</h1>
-    <section class="content m-3">
-        <div class="container-fluid">
-            <div class="card">
-                <!-- /.card-header -->
-                <div class="card-body p-0">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th style="width: 10px">#</th>
-                                <th class="">Name</th>
-                                <th class="">Description</th>
-                                <th class="">Treatment Fees</th>
-                                <th class="">Registration Fees</th>
-                                <th class="">Status</th>
-                                <!-- <th style="width: 200px">Options</th> -->
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            foreach ($treatments as $c) {
-                            ?>
-                                <tr>
-                                    <td> <?= $c['id'] ?? ""; ?> </td>
-                                    <td> <?= $c['name'] ?? ""; ?> </td>
-                                    <td> <?= $c['description'] ?? ""; ?> </td>
-                                    <td class="text-right">LKR <?= number_format($c['treatment_fee'], 2) ?? 0; ?> </td>
-                                    <td class="text-right">LKR <?= number_format($c['registration_fee'], 2) ?? 0; ?> </td>
-                                    <td>
-                                        <div class="">
-                                            <?php if ($c['is_active'] == 1) { ?>
-                                                <span class="badge bg-success">Enable</span>
-                                            <?php } else { ?>
-                                                <span class="badge bg-danger">Disable</span>
-                                            <?php } ?>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div>
-                                            <!-- TODO -->
-                                            <!-- <a class="btn btn-sm btn-info m-2" href="edit.php?id=<?= $c['id']; ?>">Edit</a>
-                                            <a class="btn btn-sm btn-danger m-2" href="#" onclick="confirmDelete(<?= $c['id']; ?>)">Delete</a> -->
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php
-                            }
-                            ?>
-                        </tbody>
-                    </table>
-                </div>
-                <!-- /.card-body -->
-            </div>
+<!-- Content -->
+
+<div class="container-xxl flex-grow-1 container-p-y">
+
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Dashboard /</span> Treatments
+
+    </h4>
+
+    <!-- Basic Bootstrap Table -->
+    <div class="card">
+        <h5 class="card-header">Treatments</h5>
+        <div class="table-responsive text-nowrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Treatment Fee</th>
+                        <th>Registration Fee</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody class="table-border-bottom-0">
+                    <?php
+                    foreach ($data as $key => $t) {
+                    ?>
+                        <tr>
+                            <td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong><?= $t['name'] ?? '' ?></strong></td>
+                            <td><?= $t['description'] ?? '' ?></td>
+                            <td class="text-right">LKR <?= number_format($t['treatment_fee'], 2) ?? 0; ?> </td>
+                            <td class="text-right">LKR <?= number_format($t['registration_fee'], 2) ?? 0; ?> </td>
+                            <td>
+                                <?php if ($t['is_active'] == 1) { ?>
+                                    <span class="badge bg-success">Active</span>
+                                <?php } else { ?>
+                                    <span class="badge bg-danger">In Active</span>
+                                <?php } ?>
+                            </td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
         </div>
-    </section>
+    </div>
+    <!--/ Basic Bootstrap Table -->
+
+    <hr class="my-5" />
+
+
 </div>
-<?php require_once('../layouts/footer.php'); ?>
+
+<!-- / Content -->
+
+<!-- Modal -->
+<div class="modal fade" id="modalCenter" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <form id="create-form" action="<?= url('services/ajax_functions.php') ?>" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalCenterTitle">Add New User</h5>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="action" value="create_user">
+                    <div class="row">
+                        <div class="col mb-3">
+                            <label for="nameWithTitle" class="form-label">User Name</label>
+                            <input
+                                type="text"
+                                required
+                                id="nameWithTitle"
+                                name="user_name"
+                                class="form-control"
+                                placeholder="Enter Name" />
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <div class="col mb-3">
+                            <label for="emailWithTitle" class="form-label">Email</label>
+                            <input
+                                required
+                                type="text"
+                                name="email"
+                                id="emailWithTitle"
+                                class="form-control"
+                                placeholder="xxxx@xxx.xx" />
+                        </div>
+                    </div>
+
+
+                    <div class="row gy-2">
+                        <div class="col orm-password-toggle">
+                            <label class="form-label" for="basic-default-password1">Password</label>
+                            <div class="input-group">
+                                <input
+                                    type="password"
+                                    required
+                                    name="password"
+                                    class="form-control"
+                                    id="passwordInput"
+                                    placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                    aria-describedby="basic-default-password1" />
+                                <span id="basic-default-password1" class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                            </div>
+                        </div>
+                        <div class="col form-password-toggle">
+                            <label class="form-label" for="basic-default-password2">Confirm Password</label>
+                            <div class="input-group">
+                                <input
+                                    type="password"
+                                    required
+                                    name="confirm_password"
+                                    class="form-control"
+                                    id="confirmPasswordInput"
+                                    placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                    aria-describedby="basic-default-password2" />
+                                <span id="basic-default-password2" class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <div class="mb-3">
+                            <label for="exampleFormControlSelect1" class="form-label">Role</label>
+                            <select class="form-select" id="permission" aria-label="Default select example" name="permission" required>
+                                <option value="operator">Operator</option>
+                                <option value="doctor">Doctor</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 mt-3">
+                        <div id="alert-container"></div>
+                    </div>
+                    <div class="mb-3 mt-3">
+                        <div id="additional-fields">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                    <button type="button" class="btn btn-primary" id="create">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Udpate Modal -->
+<div class="modal fade" id="edit-user-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <form id="update-form" action="<?= url('services/ajax_functions.php') ?>" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalCenterTitle">Update User</h5>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="action" value="update_user">
+                    <input type="hidden" id="user_id" name="id" value="">
+                    <div class="row">
+                        <div class="col mb-3">
+                            <label for="nameWithTitle" class="form-label">User Name</label>
+                            <input
+                                type="text"
+                                required
+                                id="user-name"
+                                name="user_name"
+                                class="form-control"
+                                placeholder="Enter Name" />
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <div class="col mb-3">
+                            <label for="emailWithTitle" class="form-label">Email</label>
+                            <input
+                                required
+                                type="text"
+                                name="email"
+                                id="email"
+                                class="form-control"
+                                placeholder="xxxx@xxx.xx" />
+                        </div>
+                    </div>
+
+
+                    <div class="row gy-2">
+                        <div class="col orm-password-toggle">
+                            <label class="form-label" for="basic-default-password1">Password</label>
+                            <div class="input-group">
+                                <input
+                                    type="password"
+                                    required
+                                    name="password"
+                                    class="form-control"
+                                    id="password"
+                                    placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                    aria-describedby="basic-default-password1" />
+                                <span id="basic-default-password1" class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                            </div>
+                        </div>
+                        <div class="col form-password-toggle">
+                            <label class="form-label" for="basic-default-password2">Confirm Password</label>
+                            <div class="input-group">
+                                <input
+                                    type="password"
+                                    required
+                                    name="confirm_password"
+                                    class="form-control"
+                                    id="confirm-password"
+                                    placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                    aria-describedby="basic-default-password2" />
+                                <span id="basic-default-password2" class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <div class="mb-3">
+                            <label for="exampleFormControlSelect1" class="form-label">Role</label>
+                            <select class="form-select" id="edit_permission" aria-label="Default select example" name="permission" required>
+                                <option value="operator">Operator</option>
+                                <option value="doctor">Doctor</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <div class="mb-3">
+                            <label for="exampleFormControlSelect1" class="form-label">Status</label>
+                            <select class="form-select" id="is_active" aria-label="Default select example" id="is_active" name="is_active" required>
+                                <option value="1">Active</option>
+                                <option value="0">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3 mt-3">
+                        <div id="edit-alert-container"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                    <button type="button" class="btn btn-primary" id="update-user">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<?php
+require_once('../layouts/footer.php');
+?>
+<script src="<?= asset('assets/forms-js/users.js') ?>"></script>
